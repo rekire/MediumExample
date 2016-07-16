@@ -1,0 +1,83 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion "android-$project.compileSdkVersion"
+    buildToolsVersion project.buildToolsVersion
+
+    defaultConfig {
+        applicationId "eu.rekisoft.android.medium_example"
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            if(project.hasProperty('globalExamplePwd')) {
+                storeFile file("../signing.jks")
+                storePassword globalExamplePwd
+                keyAlias "release"
+                keyPassword globalExamplePwd
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            versionNameSuffix "-Development"
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if(project.hasProperty('globalExamplePwd')) {
+                signingConfig signingConfigs.release
+            }
+        }
+        release {
+            debuggable false
+            jniDebuggable false
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        normal {}
+        local {
+            targetSdkVersion 23
+        }
+    }
+
+    variantFilter { variant ->
+        if ((variant.buildType.name.equals('release') && variant.getFlavors().get(0).name.equals('local')) ||
+                (variant.buildType.name.equals('debug') && variant.getFlavors().get(0).name.equals('normal'))) {
+            variant.setIgnore(true);
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile "com.android.support:support-v4:$project.supportLibVersion"
+    compile "com.android.support:appcompat-v7:$project.supportLibVersion"
+    compile "com.android.support:recyclerview-v7:$project.supportLibVersion"
+    compile "com.android.support:design:$project.supportLibVersion"
+    compile "com.google.android.gms:play-services-base:$project.playServicesVersion"
+    compile "com.google.android.gms:play-services-gcm:$project.playServicesVersion"
+    compile "com.google.android.gms:play-services-plus:$project.playServicesVersion"
+    compile "com.google.android.gms:play-services-auth:$project.playServicesVersion"
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha3'
+    testCompile 'junit:junit:4.12'
+}
